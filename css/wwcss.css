@@ -1,0 +1,156 @@
+*{
+	margin:0;
+	padding:0;
+	}
+body{
+	margin: 0px;
+    width: 100%;
+    height: 100%;
+    background-color: #FFFFF0;
+	}
+#div1{
+	width: 80%;
+    height: 48px;
+    margin-right: 10%;
+    margin-left: 10%;
+    margin-bottom: 0px;
+    line-height: 48px;
+    background-color: rgba(0,0,0,1.00);
+	}
+#div1 ul li{
+	background-color: rgba(151,147,147,1.00);
+    display: block;
+    padding: 3px 54.6px;
+    float: left;
+    font-size: 36px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+	}
+.div2{
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    height: 900px;
+    margin-bottom: 0px;
+    display: inline-block;
+	}
+#div21{
+    width: 17%;
+    height: 900px;
+    border-left: 0.2px solid rgba(201,201,201,1.00);
+    display: inline-block;
+    float: left;
+    line-height: 48px;
+    font-size: 24px;
+    text-align: center;
+	}
+.div211 {
+    display: inline-block;
+}
+.div212{
+    width: 100%;
+    line-height: 48px;
+    font-size: 24px;
+    text-align: center;
+    display: none;
+	}
+.div213{
+    width: 100%;
+    line-height: 48px;
+    font-size: 24px;
+    text-align: center;
+    display: none;
+	}
+.div214{
+    width: 100%;
+    line-height: 48px;
+    font-size: 24px;
+    text-align: center;
+    display: none;
+	}
+.div215{
+    width: 100%;
+    line-height: 48px;
+    font-size: 24px;
+    text-align: center;
+    display: inline-block;
+	}
+.div216{
+    width: 100%;
+    line-height: 48px;
+    font-size: 24px;
+    text-align: center;
+    display: none;
+	}
+#div21  ul{
+
+	}
+#div21 ul .li1{
+    margin-bottom: 0px;
+    display: block;
+    padding-right: 81px;
+    padding-left: 81px;
+    background-color: #FFFFF0;
+	}
+#div21 ul .li3 {
+    background-color: #FFFFF0;
+}
+
+#div21 ul .li2{
+    /* 起容器作用，用于放置li，比li要大 */
+    width: 100%;
+    height: 260px;
+    display: none;
+    background-color: #FFFFF0;
+	}
+.li2 ul li{
+	height:33px;
+	line-height:33px;
+	font:16px normal;
+	line-height:33px;
+	list-style-position:inside;
+	color: #000;
+	list-style-image: url(../images/marker.png);
+	}
+	
+.li2 ul li a{
+	text-decoration: none;
+}
+
+#map{
+    width: 82.8%;
+    height: 900px;
+    display: inline-block;
+    float: right;
+    width: 82.8%;
+    border-left: 0.1px solid rgba(255,0,4,1.00);
+    border-right: 0.2px solid rgba(148,139,139,1.00);
+}
+
+#queryResultPanel{
+	background-color:#FFFAF0;
+	border:double 1px #0000FF;
+	border-right: none;
+	height: 600px;
+	opacity: 0.7;
+	position: fixed;
+	top:108px;
+	right: 10%;
+	display:block;
+	color: #000;
+	letter-spacing:0.1em;
+	font-family: "Times New Roman", Times, serif;
+	font-size: 16px;
+	line-height: 1.5;
+	z-index: 2;
+}
+footer {
+    width: 80%;
+    height: 24px;
+    font-size: 12px;
+    background-color: rgba(174,159,159,1.00);
+    text-align: center;
+    margin-left: 10%;
+    margin-right: 10%;
+    float: left;
+}
