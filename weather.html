@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html>
+ <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" >
+	<title>SuperMap iClient JavaScript</title>
+	<script src="libs/SuperMap.Include.js"></script>
+ <style type="text/css">
+ body {
+    margin-left: 0px;
+    margin-top: 0px;
+}
+ #map {
+	 left:0px;
+	 right:0px;
+	 width:100%;
+	 height:900px;
+	 top: 0px;
+}
+ </style>
+ </head>
+ <body>
+ <div style="display: none; margin: 0px">
+ 		<iframe src="http://i.tianqi.com/index.php?c=code&id=12&icon=1&num=5&site=12&py=changchun" width="100%" height="60px"></iframe>
+ 	</div>
+ <div id="map">     
+     </div>
+ <script type="text/javascript">
+        var map, layerWorld, vectorLayer, features, select;
+        var url = "http://localhost:8090/iserver/services/map-changchun/rest/maps/长春市区图";
+        var styleCaptial = {
+                pointRadius: 15,
+                externalGraphic: "images/marker.png",
+            },
+        map = new SuperMap.Map("map", {
+            controls: [
+                new SuperMap.Control.Navigation({
+                    dragPanOptions: {
+                        enableKinetic: true
+                    }
+                })
+                ]
+        });
+        //初始化复杂缩放控件类
+        panzoombar = new SuperMap.Control.PanZoomBar();
+        // 是否固定缩放级别为[0,16]之间的整数，默认为false
+        panzoombar.forceFixedZoomLevel = true;
+        //是否显示滑动条，默认值为false
+        panzoombar.showSlider = true;
+        /*点击箭头移动地图时，所移动的距离占总距离（上下移动的总距离为高度，左右移动的总距离为宽度）
+        的百分比，默认为null。 例如：如果slideRatio 设为0.5, 则垂直上移地图半个地图高度.*/
+        panzoombar.slideRatio = 0.5;
+        //设置缩放条滑块的高度，默认为120
+        panzoombar.sliderBarHeight = 180;
+        //设置缩放条滑块的宽度，默认为13
+        panzoombar.sliderBarWidth = 17;
+        map.addControl(panzoombar);
+        //初始化鹰眼控件类
+        overviewmap = new SuperMap.Control.OverviewMap();
+        //属性minRectSize：鹰眼范围矩形边框的最小的宽度和高度。默认为8pixels
+        overviewmap.minRectSize = 20;
+        //初始化比例尺控件类
+        scaleline = new SuperMap.Control.ScaleLine();
+        //是否使用依地量算，默认为false。推荐地图投影为EPSG:4326时设置为false；使用EPSG:900913时设置为true。为true时，比例值按照当前视图中心的水平线计算。
+        scaleline.geodesic = true;
+        
+        layerWorld = new SuperMap.Layer.TiledDynamicRESTLayer("World", url, {
+            transparent: true,
+            cacheEnabled: true
+        }, {maxResolution: "auto"});    //获取图层服务地址
+
+        layerWorld.events.on({"layerInitialized": addLayer});
+        //初始化Vector图层
+        vectorLayer = new SuperMap.Layer.Vector("Vector Layer", {renderers: ["Canvas2"]});
+        
+        //给在vector图层上所选择的要素初始化
+        var callbacks = { 
+        over: function(feature){
+            selectedFeature = feature;
+            var contentHTML = "<div style='font-size:.8em; opacity: 0.8; overflow-y:hidden;'>" +
+                    "<span style='font-weight: bold; font-size: 18px;'>"+"旅游景点"+"</span><br>";
+                if (feature.attributes["ADMINNAME"]) {
+                    contentHTML += "ADMINNAME：" + feature.attributes["ADMINNAME"] + "<br>";
+                } else {
+                    contentHTML += "NAME：" + feature.attributes["name"] + "<br>";
+                }
+                //初始化一个弹出窗口，当某个地图要素被选中时会弹出此窗口，用来显示选中地图要素的属性信息
+                popup = new SuperMap.Popup.FramedCloud("chicken",
+                    feature.geometry.getBounds().getCenterLonLat(),
+                    null,
+                    contentHTML,
+                    null,
+                    true,
+                    null,
+                    true);
+                feature.popup = popup;
+                map.addPopup(popup);
+        },
+        out: function(feature){
+            map.removePopup(feature.popup);
+            feature.popup.destroy();
+            feature.popup = null;
+        }, 
+        click: function(feature){
+            map.removePopup(feature.popup);
+            feature.popup.destroy();
+            feature.popup = null;
+            var contentHTML = "<div style='font-size:.8em; opacity: 0.8; overflow-y:hidden;'>" +
+                    "<span style='font-weight: bold; font-size: 18px;'>"+"详细信息"+"</span><br>";
+                if (feature.attributes["ADMINNAME"]) {
+                    contentHTML += "ADMINNAME：" + feature.attributes["ADMINNAME"] + "<br>";
+                } else {
+                    contentHTML += "NAME：" + feature.attributes["name"] + "<br>";
+                }
+                contentHTML += "SmID：" + feature.attributes["SmID"] + "<br>";
+                // contentHTML += "天气" + feature.attributes["SmID"] + "<br>";
+                var fso = new ActiveXObject("Scripting.FileSystemObject");
+                var f1 = fso.GetFile("../weather/nanhugy.txt");
+                contentHTML += "天气：" + f1 + "<br>";
+                contentHTML += "经度：" + feature.geometry["x"] + "<br>";
+                contentHTML += "纬度：" + feature.geometry["y"] + "</div>";
+                //初始化一个弹出窗口，当某个地图要素被选中时会弹出此窗口，用来显示选中地图要素的属性信息
+                popup = new SuperMap.Popup.FramedCloud("chicken",
+                    feature.geometry.getBounds().getCenterLonLat(),
+                    null,
+                    contentHTML,
+                    null,
+                    true,
+                    null,
+                    true);
+                feature.popup = popup;
+                map.addPopup(popup);
+        },
+    }; 
+        select = new SuperMap.Control.SelectFeature(vectorLayer, {
+            onSelect: onFeatureSelect, 
+            callbacks: callbacks, 
+            hover: false 
+        });
+        map.addControl(select);
+
+        queryBySQLALL();
+
+        //添加地图图层、控件PanZoomBar到map
+        function addLayer() {
+            map.addLayers([layerWorld, vectorLayer]);
+            map.addControl(overviewmap);
+            map.addControl(scaleline);
+            map.setCenter(new SuperMap.LonLat(5136.71 , -4159.16), 1);
+        }
+
+        //要素被选中时调用此函数
+        function onFeatureSelect(feature) {
+                selectedFeature = feature;
+                //被点选的feature第二次被选中的时候popup无需重新构建，直接显示即可
+                if (feature.popup) {
+                    feature.popup.show();
+                    return;
+                }
+                var contentHTML = "<div style='font-size:.8em; opacity: 0.8; overflow-y:hidden;'>" +
+                    "<span style='font-weight: bold; font-size: 18px;'>"+"详细信息"+"</span><br>";
+                if (feature.attributes["ADMINNAME"]) {
+                    contentHTML += "ADMINNAME：" + feature.attributes["ADMINNAME"] + "<br>";
+                } else {
+                    contentHTML += "NAME：" + feature.attributes["name"] + "<br>";
+                }
+                contentHTML += "SmID：" + feature.attributes["SmID"] + "<br>";
+                contentHTML += "经度：" + feature.geometry["x"] + "<br>";
+                contentHTML += "纬度：" + feature.geometry["y"] + "</div>";
+                //初始化一个弹出窗口，当某个地图要素被选中时会弹出此窗口，用来显示选中地图要素的属性信息
+                popup = new SuperMap.Popup.FramedCloud("chicken",
+                    feature.geometry.getBounds().getCenterLonLat(),
+                    null,
+                    contentHTML,
+                    null,
+                    true,
+                    null,
+                    true);
+                feature.popup = popup;
+                map.addPopup(popup);
+            }
+
+        //清除要素时调用此函数
+        function onFeatureUnselect(feature) {
+            map.removePopup(feature.popup);
+            feature.popup.destroy();
+            feature.popup = null;
+        }
+
+        //全部省会城市查询
+        function queryBySQLALL() {
+            vectorLayer.removeAllFeatures();
+            //查询中国的全部省会。
+            var queryParamCapital, queryBySQLParamsCapital, queryBySQLServiceCapital;
+            //初始化查询参数
+            queryParamCapital = new SuperMap.REST.FilterParameter({
+                name: "Park@Changchun",
+                attributeFilter: "SmID > 0"
+            }),
+                //初始化sql查询参数
+                queryBySQLParamsCapital = new SuperMap.REST.QueryBySQLParameters({
+                    queryParams: [queryParamCapital]
+                }),
+                //SQL查询服务
+                queryBySQLServiceCapital = new SuperMap.REST.QueryBySQLService(url, {
+                    eventListeners: {"processCompleted": processCompletedCapital, "processFailed": processFailedCapital}
+                });
+            queryBySQLServiceCapital.processAsync(queryBySQLParamsCapital);
+        }
+
+        //SQL查询(省会)成功时触发此事件
+        function processCompletedCapital(queryEventArgs) {
+                var i, j, feature,
+                    result = queryEventArgs.result;
+                features = [];
+                if (result && result.recordsets) {
+                    for (i = 0; i < result.recordsets.length; i++) {
+                        if (result.recordsets[i].features) {
+                            for (j = 0; j < result.recordsets[i].features.length; j++) {
+                                feature = result.recordsets[i].features[j];
+                                feature.style = styleCaptial;
+                                features.push(feature);
+                            }
+                        }
+                    }
+                }
+                vectorLayer.addFeatures(features);
+                console.log(features);
+                select.activate();
+            }
+            //SQL查询(省会)失败时出发的事件
+            function processFailedCapital(e) {
+                widgets.alert.showAlert(e.error.errorMsg, false);
+            }
+        //清除图层
+        function clearFeatures() {
+            //先清除上次的显示结果
+            vectorLayer.removeAllFeatures();
+            vectorLayer.refresh();
+            map.setCenter(new SuperMap.LonLat(116.40 , 39.90), 2);
+        }
+    </script>
+	</body> 
+</html>
